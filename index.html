@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Desafío 3D — Mockup Light</title>
+  <style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#fff; }</style>
+</head>
+<body>
+
+<!-- Fuentes -->
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700,800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter+Tight:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+
+<style>
+  /* ─── VARIABLES ─────────────────────────────── */
+  .d3-hero-section {
+    --blanco:   #FFFFFF;
+    --fondo:    #F9F8FF;
+    --azul:     #1C2B44;
+    --gris:     #7D8082;
+    --gris-l:   #B0B4B8;
+    --turquesa: #33D1FD;
+    --morado:   #A23FFC;
+    --borde:    rgba(28,43,68,0.08);
+    --sombra:   0 4px 32px rgba(28,43,68,0.07);
+  }
+
+  /* ─── SCROLL-REVEAL ─────────────────────────── */
+  .d3-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(.22,1,.36,1),
+                transform 0.65s cubic-bezier(.22,1,.36,1);
+  }
+  .d3-reveal.d3-visible { opacity:1; transform:translateY(0); }
+  .d3-reveal.d3-d1 { transition-delay:0.08s; }
+  .d3-reveal.d3-d2 { transition-delay:0.16s; }
+  .d3-reveal.d3-d3 { transition-delay:0.24s; }
+  .d3-reveal.d3-d4 { transition-delay:0.32s; }
+  .d3-reveal.d3-d5 { transition-delay:0.40s; }
+  .d3-reveal.d3-d6 { transition-delay:0.50s; }
+
+  /* ─── MESH BACKGROUND ───────────────────────── */
+  .d3-mesh-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .d3-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: d3-float 10s ease-in-out infinite;
+  }
+  .d3-blob-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(162,63,252,0.13) 0%, transparent 70%);
+    top: -200px; left: -150px;
+    animation-delay: 0s;
+  }
+  .d3-blob-2 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(51,209,253,0.10) 0%, transparent 70%);
+    top: -100px; right: -150px;
+    animation-delay: -4s;
+  }
+  .d3-blob-3 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(162,63,252,0.07) 0%, transparent 70%);
+    bottom: 0; left: 30%;
+    animation-delay: -7s;
+  }
+  @keyframes d3-float {
+    0%,100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-24px) scale(1.03); }
+  }
+
+  /* ─── WRAPPER ───────────────────────────────── */
+  .d3-hero-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* ─── CANVAS ────────────────────────────────── */
+  #d3-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    width: 100%; height: 100%;
+  }
+
+  /* ══════════════════════════════════════════════
+     HERO — BASE DESKTOP
+  ══════════════════════════════════════════════ */
+  .d3-hero-section {
+    position: relative;
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 32px 80px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    color: var(--azul);
+    margin: 0 !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .d3-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    width: 100%;
+    text-align: center;
+    padding: 0 40px;
+  }
+
+  /* ─── PRE-HEADLINE PILL ─────────────────────── */
+  .d3-pre-headline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #A23FFC;
+    background: rgba(162,63,252,0.07);
+    border: 1px solid rgba(162,63,252,0.18);
+    border-radius: 100px;
+    padding: 7px 18px;
+    margin-bottom: 32px;
+    max-width: 100%;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .d3-pre-headline::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #33D1FD, #A23FFC);
+    flex-shrink: 0;
+  }
+  .d3-pre-headline:hover {
+    background: rgba(162,63,252,0.11);
+    box-shadow: 0 0 0 3px rgba(162,63,252,0.08);
+  }
+
+  /* ─── HEADLINE ──────────────────────────────── */
+  .d3-headline {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: clamp(32px, 3.8vw, 54px);
+    line-height: 1.07;
+    letter-spacing: -0.04em;
+    color: #1C2B44;
+    margin: 0 auto 22px;
+    max-width: 1100px;
+    white-space: nowrap;
+  }
+  .d3-headline .d3-grad {
+    background: linear-gradient(100deg, #33D1FD 0%, #A23FFC 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── SUBHEADLINE ───────────────────────────── */
+  .d3-subheadline {
+    font-size: clamp(16px, 1.8vw, 20px);
+    font-weight: 400;
+    color: #4A5568;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .d3-tagline {
+    font-size: clamp(14px, 1.4vw, 16px);
+    font-weight: 400;
+    color: var(--gris);
+    line-height: 1.5;
+    margin-bottom: 40px;
+    font-style: italic;
+  }
+
+  /* ─── MICROCOPY ─────────────────────────────── */
+  .d3-microcopy {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 28px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .d3-microcopy-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1C2B44;
+    min-height: 44px;
+    padding: 4px 0;
+  }
+  .d3-check { width: 20px; height: 20px; flex-shrink: 0; }
+
+  /* ─── DIVIDER ───────────────────────────────── */
+  .d3-divider {
+    width: 64px; height: 2px;
+    background: linear-gradient(90deg, #33D1FD, #A23FFC);
+    border-radius: 2px;
+    margin: 0 auto 48px;
+    opacity: 0.6;
+  }
+
+  /* ─── STATS ─────────────────────────────────── */
+  .d3-stats-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px 64px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .d3-stat { text-align: center; }
+  .d3-stat-number {
+    font-family: 'Clash Display', sans-serif;
+    font-size: clamp(34px, 4vw, 48px);
+    font-weight: 700;
+    background: linear-gradient(120deg, #33D1FD, #A23FFC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .d3-stat-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: #7D8082;
+    max-width: 150px;
+    line-height: 1.45;
+    margin: 0 auto;
+  }
+
+  /* ─── GLASS VIDEO CARD ──────────────────────── */
+  @keyframes d3-card-pulse {
+    0%, 100% {
+      box-shadow:
+        0 8px 40px rgba(28,43,68,0.08),
+        0 0 0 1px rgba(162,63,252,0.28),
+        0 0 18px rgba(162,63,252,0.09),
+        0 0 36px rgba(162,63,252,0.04),
+        0 1px 0 rgba(255,255,255,0.9) inset;
+    }
+    50% {
+      box-shadow:
+        0 8px 40px rgba(28,43,68,0.09),
+        0 0 0 1px rgba(162,63,252,0.42),
+        0 0 26px rgba(162,63,252,0.16),
+        0 0 52px rgba(162,63,252,0.07),
+        0 1px 0 rgba(255,255,255,0.9) inset;
+    }
+  }
+  .d3-video-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow:
+      0 8px 40px rgba(28,43,68,0.08),
+      0 0 0 1px rgba(162,63,252,0.28),
+      0 0 18px rgba(162,63,252,0.09),
+      0 0 36px rgba(162,63,252,0.04),
+      0 1px 0 rgba(255,255,255,0.9) inset;
+    max-width: 680px;
+    margin: 0 auto;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    animation: d3-card-pulse 3.5s ease-in-out infinite;
+  }
+  .d3-video-card:hover {
+    animation: none;
+    transform: translateY(-4px);
+    box-shadow:
+      0 20px 60px rgba(28,43,68,0.12),
+      0 0 0 1.5px rgba(162,63,252,0.55),
+      0 0 32px rgba(162,63,252,0.18),
+      0 0 64px rgba(162,63,252,0.08);
+  }
+  .d3-video-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B0B4B8;
+    margin-bottom: 16px;
+  }
+  .d3-video-embed {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(28,43,68,0.06);
+    background: var(--fondo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .d3-video-embed iframe {
+    width: 100%; height: 100%;
+    border: none; display: block;
+  }
+
+  /* ══════════════════════════════════════════════
+     LARGE TABLET  ≤ 1024px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .d3-hero-section { padding: 90px 24px 72px; }
+    .d3-hero-inner   { padding: 0 24px; }
+    .d3-headline     { white-space: normal; font-size: clamp(30px, 4.5vw, 46px); }
+    .d3-blob-1       { width: 500px; height: 500px; }
+    .d3-blob-2       { width: 420px; height: 420px; }
+  }
+
+  /* ══════════════════════════════════════════════
+     TABLET  ≤ 768px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .d3-hero-section  { padding: 80px 20px 64px; }
+    .d3-hero-inner    { padding: 0 16px; }
+    .d3-pre-headline  { font-size: 12px; padding: 6px 16px; margin-bottom: 24px; line-height: 1.5; text-align: center; }
+    .d3-headline      { white-space: normal; font-size: clamp(28px, 5.5vw, 40px); letter-spacing: -0.03em; margin-bottom: 18px; }
+    .d3-subheadline   { font-size: clamp(15px, 2.5vw, 18px); }
+    .d3-tagline       { font-size: 14px; margin-bottom: 32px; }
+    .d3-microcopy     { gap: 6px 20px; margin-bottom: 36px; }
+    .d3-microcopy-item{ font-size: 13px; }
+    .d3-divider       { margin-bottom: 36px; }
+    .d3-stats-row     { gap: 12px 40px; margin-bottom: 36px; }
+    .d3-stat-number   { font-size: clamp(30px, 6vw, 42px); }
+    .d3-stat-label    { font-size: 12px; max-width: 130px; }
+    .d3-video-card    { padding: 20px; border-radius: 18px; }
+    .d3-blob-1        { width: 350px; height: 350px; top: -80px; left: -60px; }
+    .d3-blob-2        { width: 280px; height: 280px; }
+    .d3-blob-3        { display: none; }
+  }
+
+  /* ══════════════════════════════════════════════
+     MOBILE  ≤ 480px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .d3-hero-section  { padding: 72px 16px 56px; min-height: auto; }
+    .d3-hero-inner    { padding: 0; }
+    .d3-pre-headline  { font-size: 11px; padding: 6px 14px; margin-bottom: 18px; max-width: calc(100vw - 48px); white-space: normal; }
+    .d3-headline      { font-size: clamp(26px, 7.5vw, 34px); letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 14px; }
+    .d3-subheadline   { font-size: 15px; padding: 0 4px; }
+    .d3-tagline       { font-size: 13px; margin-bottom: 26px; padding: 0 4px; }
+    .d3-microcopy     { flex-direction: column; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .d3-microcopy-item{ font-size: 14px; min-height: 44px; }
+    .d3-divider       { width: 48px; margin-bottom: 28px; }
+    .d3-stats-row     { gap: 8px 24px; margin-bottom: 28px; }
+    .d3-stat-number   { font-size: clamp(28px, 9vw, 38px); }
+    .d3-stat-label    { font-size: 11px; max-width: 110px; }
+    .d3-video-card    { padding: 14px; border-radius: 14px; }
+    .d3-video-label   { font-size: 10px; }
+    .d3-blob-1        { width: 280px; height: 280px; opacity: 0.7; }
+    .d3-blob-2        { width: 220px; height: 220px; opacity: 0.6; }
+  }
+
+  @media (hover: none) {
+    .d3-video-card:hover   { transform: none; box-shadow: 0 8px 40px rgba(28,43,68,0.08); }
+    .d3-pre-headline:hover { background: rgba(162,63,252,0.07); box-shadow: none; }
+  }
+</style>
+
+<div class="d3-hero-wrapper">
+<section class="d3-hero-section">
+
+  <canvas id="d3-particles"></canvas>
+
+  <div class="d3-mesh-bg">
+    <div class="d3-blob d3-blob-1" data-d3parallax="0.03"></div>
+    <div class="d3-blob d3-blob-2" data-d3parallax="-0.04"></div>
+    <div class="d3-blob d3-blob-3" data-d3parallax="0.02"></div>
+  </div>
+
+  <div class="d3-hero-inner">
+
+    <!-- Pre-headline -->
+    <p class="d3-pre-headline d3-reveal d3-d1">
+      No necesitas más ideas. Necesitas saber cómo convertir lo que ya sabes en ingresos.
+    </p>
+
+    <!-- Headline -->
+    <h1 class="d3-headline d3-reveal d3-d2">
+      Crea tu primer producto digital y<br/>
+      empieza a generar ingresos <span class="d3-grad">en solo 3 días.</span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="d3-subheadline d3-reveal d3-d3">
+      Aunque no tengas experiencia, seguidores ni una idea clara.
+    </p>
+    <p class="d3-tagline d3-reveal d3-d3">
+      Convierte lo que ya sabes en algo que la gente esté dispuesta a pagar.
+    </p>
+
+    <!-- Microcopy -->
+    <div class="d3-microcopy">
+      <div class="d3-microcopy-item d3-reveal d3-d3">
+        <svg class="d3-check" viewBox="0 0 22 22" fill="none">
+          <defs><linearGradient id="d3g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#33D1FD"/><stop offset="100%" stop-color="#A23FFC"/></linearGradient></defs>
+          <polyline points="3,11 9,17 19,6" stroke="url(#d3g1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Acceso inmediato
+      </div>
+      <div class="d3-microcopy-item d3-reveal d3-d4">
+        <svg class="d3-check" viewBox="0 0 22 22" fill="none">
+          <defs><linearGradient id="d3g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#33D1FD"/><stop offset="100%" stop-color="#A23FFC"/></linearGradient></defs>
+          <polyline points="3,11 9,17 19,6" stroke="url(#d3g2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        7 días de garantía
+      </div>
+      <div class="d3-microcopy-item d3-reveal d3-d5">
+        <svg class="d3-check" viewBox="0 0 22 22" fill="none">
+          <defs><linearGradient id="d3g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#33D1FD"/><stop offset="100%" stop-color="#A23FFC"/></linearGradient></defs>
+          <polyline points="3,11 9,17 19,6" stroke="url(#d3g3)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        No necesitas experiencia
+      </div>
+    </div>
+
+    <div class="d3-divider d3-reveal d3-d5"></div>
+
+    <!-- Stats -->
+    <div class="d3-stats-row">
+      <div class="d3-stat d3-reveal d3-d4">
+        <div class="d3-stat-number" data-d3count="100" data-d3prefix="+">+0</div>
+        <div class="d3-stat-label">profesionales, coaches, docentes y consultores</div>
+      </div>
+      <div class="d3-stat d3-reveal d3-d5">
+        <div class="d3-stat-number" data-d3count="7000" data-d3prefix="+">+0</div>
+        <div class="d3-stat-label">personas impactadas con contenido de valor</div>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <div class="d3-video-card d3-reveal d3-d6">
+      <p class="d3-video-label">Ellos ya dieron el paso. Esto es lo que dicen.</p>
+      <div class="d3-video-embed">
+        <!-- ⚠️ REEMPLAZA src con tu embed de Bunny.net -->
+        <!-- <iframe src="..." allow="autoplay" allowfullscreen loading="lazy"></iframe> -->
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     BLOQUE 02 — DOLOR
+═══════════════════════════════════════════ -->
+<style>
+  /* ─── SCROLL-REVEAL B2 ───────────────────── */
+  .d3b2-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(.22,1,.36,1),
+                transform 0.65s cubic-bezier(.22,1,.36,1);
+  }
+  .d3b2-reveal.d3b2-visible { opacity: 1; transform: translateY(0); }
+  .d3b2-reveal.d3b2-d1 { transition-delay: 0.06s; }
+  .d3b2-reveal.d3b2-d2 { transition-delay: 0.12s; }
+  .d3b2-reveal.d3b2-d3 { transition-delay: 0.18s; }
+  .d3b2-reveal.d3b2-d4 { transition-delay: 0.24s; }
+  .d3b2-reveal.d3b2-d5 { transition-delay: 0.30s; }
+  .d3b2-reveal.d3b2-d6 { transition-delay: 0.36s; }
+  .d3b2-reveal.d3b2-d7 { transition-delay: 0.42s; }
+  .d3b2-reveal.d3b2-d8 { transition-delay: 0.50s; }
+
+  /* ─── SECCIÓN ────────────────────────────── */
+  .d3b2-section {
+    position: relative;
+    background: #ffffff;
+    padding: 96px 32px 104px;
+    font-family: 'Inter', sans-serif;
+    color: #1C2B44;
+    overflow: hidden;
+  }
+
+  /* ─── BLOBS ──────────────────────────────── */
+  .d3b2-blobs {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .d3b2-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(90px);
+    animation: d3b2-float 11s ease-in-out infinite;
+  }
+  .d3b2-blob-a {
+    width: 560px; height: 560px;
+    background: radial-gradient(circle, rgba(51,209,253,0.08) 0%, transparent 70%);
+    top: -180px; right: -160px; animation-delay: 0s;
+  }
+  .d3b2-blob-b {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(162,63,252,0.06) 0%, transparent 70%);
+    bottom: -120px; left: -100px; animation-delay: -5s;
+  }
+  @keyframes d3b2-float {
+    0%,100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-20px) scale(1.02); }
+  }
+
+  /* ─── INNER ──────────────────────────────── */
+  .d3b2-inner {
+    position: relative; z-index: 1;
+    max-width: 960px; margin: 0 auto; text-align: center;
+  }
+
+  /* ─── EYEBROW ────────────────────────────── */
+  .d3b2-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #7D8082;
+    background: rgba(28,43,68,0.05); border: 1px solid rgba(28,43,68,0.10);
+    border-radius: 100px; padding: 6px 16px; margin-bottom: 28px;
+  }
+
+  /* ─── HEADLINE ───────────────────────────── */
+  .d3b2-headline {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 400; font-size: clamp(28px, 3.5vw, 46px);
+    line-height: 1.10; letter-spacing: -0.03em;
+    color: #1C2B44; margin: 0 auto 16px; max-width: 720px;
+  }
+  .d3b2-headline em {
+    font-style: normal;
+    background: linear-gradient(100deg, #33D1FD 0%, #A23FFC 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── SUBTÍTULO ──────────────────────────── */
+  .d3b2-sub {
+    font-size: clamp(15px, 1.6vw, 18px); font-weight: 400;
+    color: #7D8082; line-height: 1.6; margin-bottom: 56px;
+    max-width: 540px; margin-left: auto; margin-right: auto;
+  }
+
+  /* ─── GRID ───────────────────────────────── */
+  .d3b2-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 16px; margin-bottom: 48px; text-align: left;
+  }
+  .d3b2-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: linear-gradient(135deg, #F7F5FF 0%, #EFF5FF 100%);
+    border: 1px solid rgba(162,63,252,0.10);
+    border-radius: 16px; padding: 20px 22px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .d3b2-item:hover {
+    border-color: rgba(162,63,252,0.22);
+    box-shadow: 0 4px 24px rgba(162,63,252,0.08);
+  }
+  .d3b2-x { flex-shrink: 0; width: 26px; height: 26px; margin-top: 1px; }
+  .d3b2-item-text {
+    font-size: clamp(14px, 1.4vw, 15.5px); font-weight: 400;
+    color: #4A5568; line-height: 1.55;
+  }
+  .d3b2-item-text strong {
+    color: #1C2B44; font-weight: 600;
+    display: block; margin-bottom: 3px;
+  }
+
+  /* ─── SEPARADOR ──────────────────────────── */
+  .d3b2-divider {
+    width: 56px; height: 2px;
+    background: linear-gradient(90deg, #33D1FD, #A23FFC);
+    border-radius: 2px; margin: 0 auto 48px; opacity: 0.5;
+  }
+
+  /* ─── TARJETA DIAGNÓSTICO ────────────────── */
+  .d3b2-diagnosis {
+    background: #1C2B44; border-radius: 24px;
+    padding: 48px 56px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .d3b2-diagnosis::before {
+    content: ''; position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(162,63,252,0.18) 0%, transparent 65%);
+    top: -120px; right: -80px; border-radius: 50%; pointer-events: none;
+  }
+  .d3b2-diagnosis::after {
+    content: ''; position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(51,209,253,0.12) 0%, transparent 65%);
+    bottom: -100px; left: -60px; border-radius: 50%; pointer-events: none;
+  }
+  .d3b2-diag-inner { position: relative; z-index: 1; }
+  .d3b2-diag-statement {
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-weight: 400; font-size: clamp(20px, 2.4vw, 30px);
+    line-height: 1.30; letter-spacing: -0.02em;
+    color: rgba(255,255,255,0.92); margin-bottom: 6px;
+  }
+  .d3b2-diag-statement span {
+    background: linear-gradient(100deg, #33D1FD 0%, #A23FFC 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; font-weight: 500;
+  }
+  .d3b2-diag-label {
+    font-size: clamp(13px, 1.3vw, 15px); color: rgba(255,255,255,0.45);
+    margin: 22px 0 18px; letter-spacing: 0.02em;
+  }
+  .d3b2-consequences {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 12px;
+    list-style: none; margin: 0; padding: 0;
+  }
+  .d3b2-con-item {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Inter Tight', 'Inter', sans-serif;
+    font-size: clamp(16px, 1.8vw, 20px); font-weight: 500;
+    color: rgba(255,255,255,0.82); letter-spacing: -0.01em;
+  }
+  .d3b2-con-icon { flex-shrink: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .d3b2-section   { padding: 72px 20px 80px; }
+    .d3b2-grid      { grid-template-columns: 1fr; gap: 12px; margin-bottom: 36px; }
+    .d3b2-item      { padding: 16px 18px; }
+    .d3b2-diagnosis { padding: 36px 28px; }
+    .d3b2-sub       { margin-bottom: 40px; }
+  }
+  @media (max-width: 480px) {
+    .d3b2-section       { padding: 60px 16px 68px; }
+    .d3b2-sub           { font-size: 14.5px; margin-bottom: 32px; }
+    .d3b2-item          { padding: 14px 16px; gap: 12px; }
+    .d3b2-x             { width: 22px; height: 22px; }
+    .d3b2-diagnosis     { padding: 28px 20px; border-radius: 18px; }
+    .d3b2-consequences  { gap: 10px; }
+    .d3b2-divider       { margin-bottom: 36px; }
+  }
+  @media (hover: none) {
+    .d3b2-item:hover { border-color: rgba(28,43,68,0.08); box-shadow: none; }
+  }
+</style>
+
+<section class="d3b2-section">
+  <div class="d3b2-blobs">
+    <div class="d3b2-blob d3b2-blob-a"></div>
+    <div class="d3b2-blob d3b2-blob-b"></div>
+  </div>
+  <div class="d3b2-inner">
+
+    <p class="d3b2-eyebrow d3b2-reveal d3b2-d1">El problema real</p>
+
+    <h2 class="d3b2-headline d3b2-reveal d3b2-d2">
+      ¿Te identificas con<br/>
+      <em>alguna de estas situaciones?</em>
+    </h2>
+
+    <p class="d3b2-sub d3b2-reveal d3b2-d3">
+      Si llevas tiempo queriendo crear tu producto digital pero algo siempre te detiene, esto es para ti.
+    </p>
+
+    <!-- Gradiente compartido para los íconos X -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden">
+      <defs>
+        <linearGradient id="d3b2-xg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#33D1FD"/>
+          <stop offset="100%" stop-color="#A23FFC"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="d3b2-grid">
+      <div class="d3b2-item d3b2-reveal d3b2-d3">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>Tienes el conocimiento, pero no sabes por dónde empezar</strong>
+          Tienes años de experiencia valiosa y no logras convertirla en algo concreto.
+        </div>
+      </div>
+      <div class="d3b2-item d3b2-reveal d3b2-d4">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>Lo has intentado antes y siempre algo te detiene</strong>
+          Empiezas con energía, pero a mitad del camino te enredas y no terminas nada.
+        </div>
+      </div>
+      <div class="d3b2-item d3b2-reveal d3b2-d4">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>Crees que necesitas más tiempo, más herramientas o más preparación</strong>
+          Y mientras esperas el momento perfecto, el tiempo pasa.
+        </div>
+      </div>
+      <div class="d3b2-item d3b2-reveal d3b2-d5">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>No sabes cómo estructurar lo que sabes para que alguien lo compre</strong>
+          Sabes mucho, pero no sabes cómo organizarlo de forma que tenga valor de venta.
+        </div>
+      </div>
+      <div class="d3b2-item d3b2-reveal d3b2-d5">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>La tecnología te confunde y terminas sin publicar nada</strong>
+          Plataformas, herramientas, editores… demasiadas decisiones antes de empezar.
+        </div>
+      </div>
+      <div class="d3b2-item d3b2-reveal d3b2-d6">
+        <svg class="d3b2-x" viewBox="0 0 26 26" fill="none">
+          <circle cx="13" cy="13" r="12" stroke="url(#d3b2-xg)" stroke-width="1.5" opacity="0.45"/>
+          <line x1="9" y1="9" x2="17" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="9" x2="9" y2="17" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="d3b2-item-text">
+          <strong>Tienes miedo de lanzarlo y que nadie te compre</strong>
+          El síndrome del impostor aparece justo cuando estás a punto de dar el paso.
+        </div>
+      </div>
+    </div>
+
+    <div class="d3b2-divider d3b2-reveal d3b2-d6"></div>
+
+    <div class="d3b2-diagnosis d3b2-reveal d3b2-d7">
+      <div class="d3b2-diag-inner">
+        <p class="d3b2-diag-statement">
+          Estás intentando crear un producto…<br/>
+          <span>sin una estructura.</span>
+        </p>
+        <p class="d3b2-diag-label">Y por eso:</p>
+        <ul class="d3b2-consequences">
+          <li class="d3b2-con-item">
+            <svg class="d3b2-con-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <polyline points="4,2 11,7 4,12" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            te confundes
+          </li>
+          <li class="d3b2-con-item">
+            <svg class="d3b2-con-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <polyline points="4,2 11,7 4,12" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            dudas
+          </li>
+          <li class="d3b2-con-item">
+            <svg class="d3b2-con-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <polyline points="4,2 11,7 4,12" stroke="url(#d3b2-xg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            y no avanzas.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  /* ── SCROLL REVEAL — BLOQUE 02 ── */
+  const ro2 = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('d3b2-visible'); ro2.unobserve(e.target); }
+    });
+  }, { threshold: 0.10 });
+  document.querySelectorAll('.d3b2-reveal').forEach(function(el) { ro2.observe(el); });
+  window.addEventListener('load', function() {
+    document.querySelectorAll('.d3b2-reveal').forEach(function(el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('d3b2-visible');
+    });
+  });
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════
+     HERO — SCRIPTS
+═══════════════════════════════════════════ -->
+<script>
+(function () {
+  /* ════════════════════════════════════════════════
+     BACKGROUND ANIMADO — SISTEMA DE 3 CAPAS
+     1. Dot grid  (pre-renderizado en offscreen canvas)
+     2. Red de nodos brillantes + líneas animadas
+     3. Partículas ambiente sutiles
+  ════════════════════════════════════════════════ */
+  const canvas  = document.getElementById('d3-particles');
+  const ctx     = canvas.getContext('2d');
+  const section = canvas.closest('.d3-hero-section');
+
+  const C_MOR = 'rgba(162,63,252,';
+  const C_TUR = 'rgba(51,209,253,';
+  const C_AZL = 'rgba(28,43,68,';
+  const NODE_COLORS  = [C_MOR, C_TUR];
+  const PART_COLORS  = [C_MOR, C_TUR, C_AZL];
+
+  /* Offscreen canvas para el dot grid */
+  const gridCvs = document.createElement('canvas');
+  const gCtx    = gridCvs.getContext('2d');
+
+  let W, H, particles, nodes, pulses;
+
+  function rand(a, b) { return Math.random() * (b - a) + a; }
+
+  /* ── CAPA 1: Dot grid pre-renderizado ── */
+  function buildGrid() {
+    gridCvs.width  = W;
+    gridCvs.height = H;
+    gCtx.clearRect(0, 0, W, H);
+    const STEP = 80;
+    for (let x = STEP / 2; x < W; x += STEP) {
+      for (let y = STEP / 2; y < H; y += STEP) {
+        const ci = (Math.floor(x / STEP) + Math.floor(y / STEP)) % 2;
+        gCtx.beginPath();
+        gCtx.arc(x, y, 0.85, 0, Math.PI * 2);
+        gCtx.fillStyle = ci === 0 ? C_MOR + '0.035)' : C_TUR + '0.025)';
+        gCtx.fill();
+      }
+    }
+  }
+
+  /* ── CAPA 2A: Nodos de red ── */
+  function mkNode() {
+    const ci    = Math.floor(Math.random() * 2);
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(0.025, 0.07);
+    return {
+      x: rand(W * 0.05, W * 0.95),
+      y: rand(H * 0.05, H * 0.95),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      size: rand(2.6, 4.6),
+      color: NODE_COLORS[ci],
+      baseAlpha: rand(0.14, 0.22),
+      alpha: rand(0.14, 0.22),
+      pulseSpeed: rand(0.004, 0.010),
+      pulseAmp: rand(0.04, 0.07),
+      pulseOffset: rand(0, Math.PI * 2),
+      tick: rand(0, Math.PI * 2),
+    };
+  }
+
+  function drawNode(n) {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
+    ctx.shadowBlur  = n.size * 14;
+    ctx.shadowColor = n.color + n.alpha + ')';
+    ctx.fillStyle   = n.color + n.alpha + ')';
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+  }
+
+  /* ── CAPA 2B: Conexiones entre nodos (dashes animados) ── */
+  const NODE_MAX  = 230;
+  let   dashOff   = 0;
+
+  function drawConnections() {
+    ctx.save();
+    ctx.lineWidth = 0.55;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        if (d >= NODE_MAX) continue;
+        const a = (1 - d / NODE_MAX) * 0.08;
+        ctx.setLineDash([5, 16]);
+        ctx.lineDashOffset = -dashOff;
+        ctx.strokeStyle    = C_MOR + a + ')';
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  /* ── CAPA 2C: Pulsos viajando por las aristas ── */
+  function mkPulse(from, to) {
+    return {
+      from, to,
+      t: 0,
+      speed: rand(0.003, 0.007),
+      color: Math.random() > 0.5 ? C_TUR : C_MOR,
+    };
+  }
+
+  let lastSpawn = 0;
+
+  function spawnPulse(now) {
+    if (now - lastSpawn < 900) return;
+    if (pulses.length >= 4)    return;
+    if (Math.random() > 0.35)  return;
+    for (let t = 0; t < 15; t++) {
+      const i = Math.floor(Math.random() * nodes.length);
+      const j = Math.floor(Math.random() * nodes.length);
+      if (i === j) continue;
+      const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+      if (Math.sqrt(dx * dx + dy * dy) < NODE_MAX) {
+        pulses.push(mkPulse(i, j));
+        lastSpawn = now;
+        break;
+      }
+    }
+  }
+
+  function drawPulses() {
+    pulses = pulses.filter(p => p.t <= 1.02);
+    for (const p of pulses) {
+      const na = nodes[p.from], nb = nodes[p.to];
+      const dx = nb.x - na.x, dy = nb.y - na.y;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d >= NODE_MAX) { p.t = 2; continue; }
+      const px = na.x + dx * p.t;
+      const py = na.y + dy * p.t;
+      const a  = Math.sin(p.t * Math.PI) * 0.38;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.6, 0, Math.PI * 2);
+      ctx.shadowBlur  = 10;
+      ctx.shadowColor = p.color + a + ')';
+      ctx.fillStyle   = p.color + a + ')';
+      ctx.fill();
+      ctx.shadowBlur  = 0;
+      p.t += p.speed;
+    }
+  }
+
+  /* ── CAPA 3: Partículas ambiente ── */
+  function mkParticle() {
+    const color = PART_COLORS[Math.floor(Math.random() * PART_COLORS.length)];
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(0.07, 0.22);
+    return {
+      x: rand(0, W), y: rand(0, H),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      size: rand(0.6, 1.8),
+      color,
+      baseAlpha: rand(0.03, 0.10),
+      alpha: rand(0.03, 0.10),
+      pulseSpeed: rand(0.003, 0.008),
+      pulseAmp: rand(0.015, 0.04),
+      pulseOffset: rand(0, Math.PI * 2),
+      tick: rand(0, Math.PI * 2),
+    };
+  }
+
+  function drawParticle(p) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.shadowBlur  = p.size * 7;
+    ctx.shadowColor = p.color + p.alpha + ')';
+    ctx.fillStyle   = p.color + p.alpha + ')';
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+  }
+
+  /* ── INIT ── */
+  function init() {
+    const density   = W <= 480 ? 30000 : W <= 768 ? 24000 : 20000;
+    particles = Array.from({ length: Math.floor((W * H) / density) }, mkParticle);
+    const nc  = W <= 480 ? 5 : W <= 768 ? 7 : 10;
+    nodes  = Array.from({ length: nc }, mkNode);
+    pulses = [];
+    buildGrid();
+  }
+
+  /* ── LOOP ── */
+  function loop(now) {
+    ctx.clearRect(0, 0, W, H);
+
+    /* Dot grid */
+    ctx.drawImage(gridCvs, 0, 0);
+
+    /* Conexiones + pulsos */
+    dashOff = (now * 0.014) % 21;
+    drawConnections();
+    spawnPulse(now);
+    drawPulses();
+
+    /* Partículas ambiente */
+    for (const p of particles) {
+      p.tick += p.pulseSpeed;
+      p.alpha = Math.max(0, Math.min(
+        p.baseAlpha + Math.sin(p.tick + p.pulseOffset) * p.pulseAmp, 0.16
+      ));
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -4) p.x = W + 4; else if (p.x > W + 4) p.x = -4;
+      if (p.y < -4) p.y = H + 4; else if (p.y > H + 4) p.y = -4;
+      drawParticle(p);
+    }
+
+    /* Nodos de red */
+    for (const n of nodes) {
+      n.tick += n.pulseSpeed;
+      n.alpha = Math.max(0, Math.min(
+        n.baseAlpha + Math.sin(n.tick + n.pulseOffset) * n.pulseAmp, 0.30
+      ));
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0) { n.x = 0; n.vx = Math.abs(n.vx); }
+      else if (n.x > W) { n.x = W; n.vx = -Math.abs(n.vx); }
+      if (n.y < 0) { n.y = 0; n.vy = Math.abs(n.vy); }
+      else if (n.y > H) { n.y = H; n.vy = -Math.abs(n.vy); }
+      drawNode(n);
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  /* ── RESIZE ── */
+  function resize() {
+    W = canvas.width  = section.offsetWidth;
+    H = canvas.height = section.offsetHeight;
+  }
+
+  window.addEventListener('resize', () => { resize(); init(); });
+  resize(); init(); requestAnimationFrame(loop);
+
+  /* ── PARALLAX ── */
+  const blobs = document.querySelectorAll('[data-d3parallax]');
+  let ticking = false;
+  window.addEventListener('scroll', ()=>{
+    if(!ticking){
+      requestAnimationFrame(()=>{
+        const y=window.scrollY;
+        blobs.forEach(b=>{ b.style.transform=`translateY(${y*parseFloat(b.dataset.d3parallax)}px)`; });
+        ticking=false;
+      });
+      ticking=true;
+    }
+  });
+
+  /* ── SCROLL REVEAL ── */
+  const ro = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('d3-visible'); ro.unobserve(e.target); } });
+  }, { threshold:0.10 });
+  document.querySelectorAll('.d3-reveal').forEach(el=>ro.observe(el));
+  window.addEventListener('load',()=>{
+    document.querySelectorAll('.d3-reveal').forEach(el=>{
+      if(el.getBoundingClientRect().top < window.innerHeight) el.classList.add('d3-visible');
+    });
+  });
+
+  /* ── COUNT-UP ── */
+  const co = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      const el=e.target, end=parseInt(el.dataset.d3count), prefix=el.dataset.d3prefix||'';
+      const fmt=n=>prefix+(end>=1000?n.toLocaleString('es-ES'):n);
+      const t0=performance.now();
+      (function tick(now){
+        const p=Math.min((now-t0)/1800,1), ease=1-Math.pow(1-p,3);
+        el.textContent=fmt(Math.floor(ease*end));
+        if(p<1) requestAnimationFrame(tick);
+      })(t0);
+      co.unobserve(el);
+    });
+  }, { threshold:0.5 });
+  document.querySelectorAll('[data-d3count]').forEach(el=>co.observe(el));
+})();
+</script>
+
+</body>
+</html>
